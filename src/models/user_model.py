@@ -8,12 +8,12 @@ class Usuario(db.Model):
     pais = db.Column(db.String(50))
     estado = db.Column(db.String(50))
     municipio = db.Column(db.String(70))
-    cep = db.Column(db.Integer)
+    cep = db.Column(db.String(8))
     rua = db.Column(db.String(150))
     numero = db.Column(db.Integer)
     complemento = db.Column(db.String(50))
-    cpf = db.Column(db.Integer)
-    pis = db.Column(db.Integer)
+    cpf = db.Column(db.String(11))
+    pis = db.Column(db.String(11))
     senha_hash = db.Column(db.String(128))
 
     @property

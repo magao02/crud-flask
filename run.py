@@ -1,13 +1,12 @@
 
-from datetime import timedelta
-from flask import Flask, request, Response
-import json
+
+from flask import Flask, request
+from flask_cors import CORS
 from src.models.user_model import Usuario
-from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from flask_jwt_extended import JWTManager, jwt_required
 from src.configurations import database
 from src.configurations.database import db
 from src.services.user_service import User_service
-from src.configurations import authetication_jwt
 from config import config_selector
 
 
@@ -15,6 +14,7 @@ app = Flask(__name__)
 app.config.from_object(config_selector["development"])
 JWT = JWTManager(app) 
 database.init_app(app)
+CORS(app)
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -41,8 +41,8 @@ def seleciona_usuario(id):
     return usuario_response
 
 @app.route("/usuario/<id>" ,methods=["PUT"])
-@jwt_required
 def atualizar(id):
+    print(id)
     body = request.get_json()
     usuario_response = User_service.edita_usuario(id,body,db)
     return usuario_response

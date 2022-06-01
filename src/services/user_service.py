@@ -5,23 +5,17 @@ from flask_jwt_extended import create_access_token
 import json
 class User_service():
     def login(body):
-        if "email" in body:
-            email = body["email"]
-            usuario_objeto = Usuario.query.filter_by(email=email).first()
+        identificador = body["identificador"]
+        usuario_objeto = Usuario.query.filter_by(email=identificador).first()
+        if not usuario_objeto:
+            usuario_objeto = Usuario.query.filter_by(cpf=identificador).first()
+        elif not usuario_objeto:
+            usuario_objeto = Usuario.query.filter_by(pis=identificador).first()
         
-        elif "cpf" in body:
-            cpf = body["cpf"]
-            usuario_objeto = Usuario.query.filter_by(cpf=cpf).first()
-
-        elif "pis" in body:
-            pis = body["pis"]
-            usuario_objeto = Usuario.query.filter_by(pis=pis).first()
-        else:
-            return "err"
         senha = body["senha"]
         if usuario_objeto.verify_password(senha):
             access_token = create_access_token(identity=usuario_objeto.cpf, expires_delta=timedelta(days=7))
-            token = {"access_token": access_token}
+            token = {"access_token": access_token, "id": usuario_objeto.id}
             return Response(json.dumps(token))
         else:
             return envia_erro(400, "A senha esta errada")
@@ -51,7 +45,7 @@ class User_service():
                 )
             db.session.add(usuario)
             db.session.commit()
-            return "cadastrado"
+            return  "usuarios"
         except Exception as e:
             print(e)
             return envia_erro(500, "Nao foi possivel cadastrar esse usuario")
@@ -69,17 +63,24 @@ class User_service():
 
     def edita_usuario(id,body,db):
         usuario_objeto = Usuario.query.filter_by(id=id).first()
-        print(usuario_objeto)
         try:
-            print(usuario_objeto)
-            if('nome' in body):
-                usuario_objeto.nome = body['nome']
-            if('email' in body):
-                usuario_objeto.email = body['email']
+            usuario_objeto.nome=body["nome"], 
+            usuario_objeto.email=body["email"],
+            usuario_objeto.pais=body["pais"], 
+            usuario_objeto.estado=body["estado"],  
+            usuario_objeto.municipio=body["municipio"],
+            usuario_objeto.cep=body["cep"],
+            usuario_objeto.rua=body["rua"],
+            usuario_objeto.numero=body["numero"],
+            usuario_objeto.complemento=body["complemento"],
+            usuario_objeto.cpf=body["cpf"],
+            usuario_objeto.pis=body["pis"],
+            usuario_objeto.assword=body["senha"]
             db.session.add(usuario_objeto)
             db.session.commit()
-            user = usuario_objeto.para_json()
-            return user
+            usuario_json = usuario_objeto.para_json()
+            return gera_response(200, "usuarios", usuario_json, "ok")
+            
         except Exception as e:
             if(usuario_objeto):
                 return envia_erro(404, "Nao foi possivel encontrar esse usuario")
@@ -88,7 +89,6 @@ class User_service():
 
     def deleta_usuario(id,db):
         usuario_objeto = Usuario.query.filter_by(id=id).first()
-        print(usuario_objeto)
         try:
             db.session.delete(usuario_objeto)
             db.session.commit()
